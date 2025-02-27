@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <title>Frontend Mentor | IP Address Tracker</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    header {
+      background: url('./images/pattern-bg.png') no-repeat center center/cover;
+      text-align: center;
+      padding: 20px;
+      color: white;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    #ipForm {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    #ipInput {
+      padding: 10px;
+      width: 300px;
+      border: none;
+      border-radius: 10px 0 0 10px;
+      font-size: 16px;
+    }
+
+    #ipForm button {
+      background: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 0 10px 10px 0;
+      cursor: pointer;
+    }
+
+    #ipForm button img {
+      width: 10px;
+    }
+
+    #ipInfo {
+      display: flex;
+      justify-content: space-between;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 1000px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-item {
+      text-align: center;
+      flex: 1;
+      padding: 0 10px;
+    }
+
+    .info-item span {
+      font-size: 12px;
+      color: hsl(0, 0%, 59%);
+      font-weight: 500;
+    }
+
+    .info-item p {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 5px 0 0;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .attribution {
+      font-size: 11px;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .attribution a {
+      color: hsl(228, 45%, 44%);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>IP Address Tracker</h1>
+    <form id="ipForm">
+      <input type="text" id="ipInput" placeholder="Search for any IP address or domain">
+      <button type="submit"><img src="./images/icon-arrow.svg" alt="Search"></button>
+    </form>
+  </header>
+
+  <main>
+    <div id="ipInfo">
+      <div class="info-item">
+        <span>IP Address</span>
+        <p id="ipAddress">-</p>
+      </div>
+      <div class="info-item">
+        <span>Location</span>
+        <p id="location">-</p>
+      </div>
+      <div class="info-item">
+        <span>Timezone</span>
+        <p id="timezone">-</p>
+      </div>
+      <div class="info-item">
+        <span>ISP</span>
+        <p id="isp">-</p>
+      </div>
+    </div>
+
+    <div id="map"></div>
+  </main>
+
+  <footer class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+    Coded by <a href="https://www.linkedin.com/in/zammad-asghar/">ZAMMAD ASGHAR</a>.
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Initialize the map
+    let map = L.map('map').setView([51.505, -0.09], 13); // Default location (London)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Function to fetch IP data
+    async function fetchIPData(ip = '') {
+      const apiKey = 'YOUR_API_KEY'; // Replace with your IPify API key
+      const url = `https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&ipAddress=${ip}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        updateUI(data);
+      } catch (error) {
+        console.error('Error fetching IP data:', error);
+      }
+    }
+
+    // Function to update the UI with IP data
+    function updateUI(data) {
+      document.getElementById('ipAddress').textContent = data.ip || '-';
+      document.getElementById('location').textContent = `${data.location.city}, ${data.location.region}, ${data.location.country}` || '-';
+      document.getElementById('timezone').textContent = `UTC ${data.location.timezone}` || '-';
+      document.getElementById('isp').textContent = data.isp || '-';
+
+      // Update the map
+      const lat = data.location.lat;
+      const lng = data.location.lng;
+      map.setView([lat, lng], 13);
+      L.marker([lat, lng]).addTo(map);
+    }
+
+    // Fetch user's IP on page load
+    fetchIPData();
+
+    // Handle form submission
+    document.getElementById('ipForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ip = document.getElementById('ipInput').value;
+      fetchIPData(ip);
+    });
+  </script>
+  
+  </div>
+</body>
+</html>
+  
+  
